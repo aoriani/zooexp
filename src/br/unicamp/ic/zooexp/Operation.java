@@ -18,6 +18,17 @@ public class Operation {
 	this.type = type;
 	this.arg = argument;
     }
+    
+    public int getType(){
+	return type;
+    }
+    
+    public int getArg(){
+	if(type == READ_OP)
+	    throw new UnsupportedOperationException("Read operation do not take arguments");
+	
+	return arg;
+    }
 
     public void serialize(DataOutputStream out) throws IOException {
 	out.writeInt(type);

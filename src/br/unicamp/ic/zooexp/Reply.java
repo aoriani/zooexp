@@ -7,8 +7,9 @@ import java.io.IOException;
 public class Reply {
 
     //Types
-    private static final int REPLY_ACK = 1;
-    private static final int REPLY_VALUE = 2;
+    public static final int REPLY_FAILURE = -1;
+    public static final int REPLY_SUCCESS = 1;
+    public static final int REPLY_VALUE = 2;
 
     private int type;
     private int returnValue = 0;
@@ -19,13 +20,18 @@ public class Reply {
 	this.returnValue = returnValue;
     }
      
-    public static Reply createAck(){
-	return new Reply(REPLY_ACK,0);
+    public static Reply createSuccessReply(){
+	return new Reply(REPLY_SUCCESS,0);
     }
     
-    public static Reply createReturn(int returnValue){
+    public static Reply createFailureReply(){
+	return new Reply(REPLY_FAILURE,0);
+    }
+    
+    public static Reply createReturnReply(int returnValue){
 	 return new Reply(REPLY_VALUE,returnValue);
     }
+    
     
     public void serialize(DataOutputStream out) throws IOException {
 	out.writeInt(type);
@@ -38,8 +44,12 @@ public class Reply {
 	return new Reply(type,value);
     }
     
-    public int returnValue(){
-	if(type != REPLY_ACK) 
+    public int getType(){
+	return type;
+    }
+    
+    public int getReturnValue(){
+	if(type != REPLY_VALUE) 
 	    throw new UnsupportedOperationException("Acknowledges do not have return values");
 	return returnValue;
     }
