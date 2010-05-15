@@ -5,11 +5,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import org.apache.log4j.Logger;
+
 import br.unicamp.ic.zooexp.Operation;
 import br.unicamp.ic.zooexp.Reply;
 
 public class WorkerThread implements Runnable {
-
+    
+    /** Logger */
+    private static final Logger log = Logger.getLogger(Data.class);
+    
     Socket connection;
     Data data;
     DataInputStream fromClientStream;
@@ -41,9 +46,7 @@ public class WorkerThread implements Runnable {
 		    processRequest();
 		} catch (IOException e) { //Some error or client disconnected
 		    clientConnected = false;
-
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
+		    log.info("Connection with client ended", e);
 		}
 	    }
 
@@ -51,8 +54,7 @@ public class WorkerThread implements Runnable {
 	    try {
 		connection.close();
 	    } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		log.error("Problem when closing connection to cliente", e);
 	    }
 
 	}
