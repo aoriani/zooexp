@@ -60,6 +60,10 @@ public class Data {
 	}
 	
     }
+
+    public synchronized int getValue() {
+	return data;
+    }
     
     
 }

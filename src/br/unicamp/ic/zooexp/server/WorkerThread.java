@@ -2,6 +2,7 @@ package br.unicamp.ic.zooexp.server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -43,10 +44,14 @@ public class WorkerThread implements Runnable {
 
 	    while (clientConnected) {
 		try {
+		    log.info("Processing a new request");
 		    processRequest();
+		} catch (EOFException e) { //Some error or client disconnected
+		    clientConnected = false;
+		    log.info("Connection with client ended");
 		} catch (IOException e) { //Some error or client disconnected
 		    clientConnected = false;
-		    log.info("Connection with client ended", e);
+		    log.warn("Connection with client ended by failure", e);
 		}
 	    }
 
@@ -54,7 +59,7 @@ public class WorkerThread implements Runnable {
 	    try {
 		connection.close();
 	    } catch (IOException e) {
-		log.error("Problem when closing connection to cliente", e);
+		log.error("Problem when closing connection to client", e);
 	    }
 
 	}
