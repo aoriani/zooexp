@@ -1,6 +1,7 @@
 package br.unicamp.ic.zooexp.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,7 +10,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import mockit.Mock;
 import mockit.MockClass;
@@ -17,11 +20,12 @@ import mockit.UsingMocksAndStubs;
 
 import org.junit.Test;
 
-import br.unicamp.ic.zooexp.Operation;
-import br.unicamp.ic.zooexp.Reply;
-import br.unicamp.ic.zooexp.server.Data;
+import br.unicamp.ic.zooexp.core.Operation;
+import br.unicamp.ic.zooexp.core.Reply;
+import br.unicamp.ic.zooexp.core.server.Data;
 import br.unicamp.ic.zooexp.server.WorkerThread;
-import br.unicamp.ic.zooexp.tests.WorkerThreadTest.*;
+
+import br.unicamp.ic.zooexp.tests.WorkerThreadTest.MockedSocket;
 
 
 @UsingMocksAndStubs({MockedSocket.class})
@@ -49,6 +53,16 @@ public class WorkerThreadTest {
 	public OutputStream getOutputStream() throws IOException{
 	    return output;
 	    
+	}
+	
+	@Mock
+	public InetAddress getInetAddress() throws UnknownHostException{
+	    return InetAddress.getLocalHost();
+	}
+	
+	@Mock
+	public int getPort(){
+	    return 4040;
 	}
 	
     }
@@ -92,7 +106,7 @@ public class WorkerThreadTest {
 	Socket socket = new Socket();
 	
 	//Run work thread in current thread to make testing easier
-	Data data = Data.getInstance();
+	Data data = new Data();
 	WorkerThread workThread = new WorkerThread(socket, data);
 	workThread.run();
 	

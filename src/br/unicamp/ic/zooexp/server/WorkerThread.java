@@ -8,24 +8,28 @@ import java.net.Socket;
 
 import org.apache.log4j.Logger;
 
-import br.unicamp.ic.zooexp.Operation;
-import br.unicamp.ic.zooexp.Reply;
+import br.unicamp.ic.zooexp.core.Operation;
+import br.unicamp.ic.zooexp.core.Reply;
+import br.unicamp.ic.zooexp.core.server.Data;
 
 public class WorkerThread implements Runnable {
     
     /** Logger */
     private static final Logger log = Logger.getLogger(Data.class);
     
-    Socket connection;
-    Data data;
-    DataInputStream fromClientStream;
-    DataOutputStream toClientStream;
+    private Socket connection;
+    private Data data;
+    private DataInputStream fromClientStream;
+    private DataOutputStream toClientStream;
+    private final String clientId;
 
     public WorkerThread(Socket connection, Data data) throws IOException {
 	this.connection = connection;
 	this.data = data;
 	this.fromClientStream = new DataInputStream(connection.getInputStream());
 	this.toClientStream = new DataOutputStream(connection.getOutputStream());
+	//We use IP:Port to identify a client. It works even on same host
+	this.clientId = connection.getInetAddress().getHostAddress()+":"+connection.getPort();
     }
 
     private void processRequest() throws IOException {
@@ -44,14 +48,14 @@ public class WorkerThread implements Runnable {
 
 	    while (clientConnected) {
 		try {
-		    log.info("Processing a new request");
+		    log.info("Processing a new request from " + clientId);
 		    processRequest();
 		} catch (EOFException e) { //Some error or client disconnected
 		    clientConnected = false;
-		    log.info("Connection with client ended");
+		    log.info("Connection with client " + clientId +" ended");
 		} catch (IOException e) { //Some error or client disconnected
 		    clientConnected = false;
-		    log.warn("Connection with client ended by failure", e);
+		    log.warn("Connection with client "+ clientId +"ended by failure", e);
 		}
 	    }
 
@@ -59,7 +63,7 @@ public class WorkerThread implements Runnable {
 	    try {
 		connection.close();
 	    } catch (IOException e) {
-		log.error("Problem when closing connection to client", e);
+		log.error("Problem when closing connection to client "+ clientId, e);
 	    }
 
 	}

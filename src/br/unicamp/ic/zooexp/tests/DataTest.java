@@ -1,12 +1,13 @@
 package br.unicamp.ic.zooexp.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import br.unicamp.ic.zooexp.Operation;
-import br.unicamp.ic.zooexp.Reply;
-import br.unicamp.ic.zooexp.server.Data;
+import br.unicamp.ic.zooexp.core.Operation;
+import br.unicamp.ic.zooexp.core.Reply;
+import br.unicamp.ic.zooexp.core.server.Data;
 
 public class DataTest {
     
@@ -14,7 +15,7 @@ public class DataTest {
     
     @Test
     public void testExecuteOperation() {
-	Data data = Data.getInstance();
+	Data data = new Data();
 	
 	//Read Data to ensure it is initialized correct
 	Reply reply = data.executeOperation(readOp);

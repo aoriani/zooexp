@@ -1,4 +1,4 @@
-package br.unicamp.ic.zooexp;
+package br.unicamp.ic.zooexp.core;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

@@ -1,6 +1,7 @@
 package br.unicamp.ic.zooexp.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,7 +11,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import br.unicamp.ic.zooexp.Operation;
+import br.unicamp.ic.zooexp.core.Operation;
 
 public class OperationTest {
 
