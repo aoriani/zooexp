@@ -40,6 +40,9 @@ public class BasicServer {
 			.getHostAddress()
 			+ ":" + clientSocket.getPort();
 		log.info("Connected to " + clientId);
+		
+		//set client timeout
+		clientSocket.setSoTimeout(Configuration.getServerClientTimeout());
 
 		// Dispatching to a work thread.
 		// We use IP:port to identify client of worker thread
