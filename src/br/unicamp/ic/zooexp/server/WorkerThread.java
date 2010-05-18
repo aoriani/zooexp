@@ -55,7 +55,7 @@ public class WorkerThread implements Runnable {
 		    log.info("Connection with client " + clientId +" ended");
 		} catch (IOException e) { //Some error or client disconnected
 		    clientConnected = false;
-		    log.warn("Connection with client "+ clientId +"ended by failure", e);
+		    log.warn("Connection with client "+ clientId +" ended by failure", e);
 		}
 	    }
 

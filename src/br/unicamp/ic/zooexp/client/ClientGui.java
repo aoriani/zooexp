@@ -1,7 +1,13 @@
 package br.unicamp.ic.zooexp.client;
 
 import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.NumberFormat;
 
 import javax.swing.Box;
@@ -14,6 +20,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
+import br.unicamp.ic.zooexp.core.client.Client;
+import br.unicamp.ic.zooexp.core.client.ServerException;
+
 public class ClientGui extends JFrame {
 
     /**
@@ -23,7 +32,7 @@ public class ClientGui extends JFrame {
 
     // To make JTextField restrict its input only to numbers we
     // must reimplement the document it uses
-    private class UnsignedIntegerDocument extends PlainDocument {
+    private static class UnsignedIntegerDocument extends PlainDocument {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,10 +54,12 @@ public class ClientGui extends JFrame {
 
     JButton setBt, readBt, addBt, subBt;
     JTextField writeField, readField;
+    Client client;
 
-    public ClientGui() {
+    public ClientGui() throws UnknownHostException, IOException {
 	super("Client");
 
+	//Set up GUI
 	setBt = new JButton("SET");
 	readBt = new JButton("READ");
 	addBt = new JButton("ADD");
@@ -81,12 +92,116 @@ public class ClientGui extends JFrame {
 	pack();
 	this.setResizable(false);
 	this.setName("Client");
+	
+	
+	// Setup listeners
+	setBt.addActionListener(new ActionListener(){
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		try {
+		    client.set(getTextFieldValue());
+		} catch (ServerException e1) {
+		    // TODO Auto-generated catch block
+		    
+		} catch (IOException e1) {
+		    // TODO Auto-generated catch block
+		    
+		}
+		
+	    }
+	    
+	});
+	
+	addBt.addActionListener(new ActionListener(){
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		try {
+		    client.add(getTextFieldValue());
+		} catch (ServerException e1) {
+		    // TODO Auto-generated catch block
+		    
+		} catch (IOException e1) {
+		    // TODO Auto-generated catch block
+		    
+		}
+
+	    }
+	    
+	});
+	
+	
+	
+	subBt.addActionListener(new ActionListener(){
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		try {
+		    client.sub(getTextFieldValue());
+		} catch (ServerException e1) {
+		    // TODO Auto-generated catch block
+		    
+		} catch (IOException e1) {
+		    // TODO Auto-generated catch block
+		    
+		}
+
+	    }
+	    
+	});
+	
+	readBt.addActionListener(new ActionListener(){
+
+	    @Override
+	    public void actionPerformed(ActionEvent e) {
+		try {
+		    int result = client.get();
+		    readField.setText(Integer.toString(result));
+		} catch (ServerException e1) {
+		    // TODO Auto-generated catch block
+		    
+		} catch (IOException e1) {
+		    // TODO Auto-generated catch block
+		    
+		}
+
+	    }
+	    
+	});
+	
+	addWindowListener(new WindowAdapter(){
+
+	    @Override
+	    public void windowClosing(WindowEvent e) {
+		client.disconnect();
+	    }
+	    
+	});
+	
+	//Connect to server
+	client = new Client();
+	client.connect();
+    }
+    
+    
+    
+    private int getTextFieldValue(){
+	int result = 0;
+	try{
+	    result = Integer.parseInt(writeField.getText());
+	}catch(NumberFormatException e){
+	    // do nothing
+	}
+	return result;
     }
 
     /**
      * @param args
+     * @throws IOException 
+     * @throws UnknownHostException 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnknownHostException, IOException {
 	ClientGui client = new ClientGui();
 	client.setVisible(true);
 	client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
