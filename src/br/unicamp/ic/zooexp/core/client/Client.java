@@ -70,6 +70,7 @@ public class Client {
 	    }
 	    op.serialize(toServer);
 	    result = Reply.parse(fromServer);
+	    toServer.flush();
 	    
 	    if (result.getType() == Reply.REPLY_FAILURE) {
 	        throw new ServerException("Server failed to process request. OP:"

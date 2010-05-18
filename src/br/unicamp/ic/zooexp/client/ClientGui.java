@@ -15,7 +15,9 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
@@ -23,11 +25,9 @@ import javax.swing.text.PlainDocument;
 import br.unicamp.ic.zooexp.core.client.Client;
 import br.unicamp.ic.zooexp.core.client.ServerException;
 
-public class ClientGui extends JFrame {
+public class ClientGui extends JFrame implements
+	DispatcherThread.ClientEventListener {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = -3859715597744512663L;
 
     // To make JTextField restrict its input only to numbers we
@@ -41,9 +41,10 @@ public class ClientGui extends JFrame {
 		throws BadLocationException {
 	    StringBuffer buffer = new StringBuffer();
 	    for (int i = 0; i < str.length(); i++) {
+		
 		char c = str.charAt(i);
-
-		if (Character.isDigit(c)) {
+		//allows digits and  a minus sign if it is on the start
+		if (Character.isDigit(c) || (offs == 0 && c == '-')) {
 		    buffer.append(c);
 		}
 	    }
@@ -54,12 +55,12 @@ public class ClientGui extends JFrame {
 
     JButton setBt, readBt, addBt, subBt;
     JTextField writeField, readField;
-    Client client;
+    DispatcherThread dispatcher;
 
-    public ClientGui() throws UnknownHostException, IOException {
+    public ClientGui() {
 	super("Client");
 
-	//Set up GUI
+	// Set up GUI
 	setBt = new JButton("SET");
 	readBt = new JButton("READ");
 	addBt = new JButton("ADD");
@@ -72,7 +73,6 @@ public class ClientGui extends JFrame {
 	readField.setDocument(new UnsignedIntegerDocument());
 	readField.setEditable(false);
 
-	
 	Container container = getContentPane();
 	container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
 	container.add(writeField);
@@ -92,116 +92,98 @@ public class ClientGui extends JFrame {
 	pack();
 	this.setResizable(false);
 	this.setName("Client");
-	
-	
+
 	// Setup listeners
-	setBt.addActionListener(new ActionListener(){
+	setBt.addActionListener(new ActionListener() {
 
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		try {
-		    client.set(getTextFieldValue());
-		} catch (ServerException e1) {
-		    // TODO Auto-generated catch block
-		    
-		} catch (IOException e1) {
-		    // TODO Auto-generated catch block
-		    
-		}
-		
+		dispatcher.setValue(getTextFieldValue());
 	    }
-	    
+
 	});
-	
-	addBt.addActionListener(new ActionListener(){
+
+	addBt.addActionListener(new ActionListener() {
 
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		try {
-		    client.add(getTextFieldValue());
-		} catch (ServerException e1) {
-		    // TODO Auto-generated catch block
-		    
-		} catch (IOException e1) {
-		    // TODO Auto-generated catch block
-		    
-		}
-
+		dispatcher.addValue(getTextFieldValue());
 	    }
-	    
+
 	});
-	
-	
-	
-	subBt.addActionListener(new ActionListener(){
+
+	subBt.addActionListener(new ActionListener() {
 
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		try {
-		    client.sub(getTextFieldValue());
-		} catch (ServerException e1) {
-		    // TODO Auto-generated catch block
-		    
-		} catch (IOException e1) {
-		    // TODO Auto-generated catch block
-		    
-		}
-
+		dispatcher.subValue(getTextFieldValue());
 	    }
-	    
+
 	});
-	
-	readBt.addActionListener(new ActionListener(){
+
+	readBt.addActionListener(new ActionListener() {
 
 	    @Override
 	    public void actionPerformed(ActionEvent e) {
-		try {
-		    int result = client.get();
-		    readField.setText(Integer.toString(result));
-		} catch (ServerException e1) {
-		    // TODO Auto-generated catch block
-		    
-		} catch (IOException e1) {
-		    // TODO Auto-generated catch block
-		    
-		}
-
+		dispatcher.readValue();
 	    }
-	    
+
 	});
-	
-	addWindowListener(new WindowAdapter(){
+
+	addWindowListener(new WindowAdapter() {
 
 	    @Override
 	    public void windowClosing(WindowEvent e) {
-		client.disconnect();
+		dispatcher.disconnect();
 	    }
-	    
+
 	});
-	
-	//Connect to server
-	client = new Client();
-	client.connect();
+
+	//Start dispatcher thread
+	dispatcher = new DispatcherThread(this);
+	dispatcher.start();
     }
-    
-    
-    
-    private int getTextFieldValue(){
+
+    int getTextFieldValue() {
 	int result = 0;
-	try{
+	try {
 	    result = Integer.parseInt(writeField.getText());
-	}catch(NumberFormatException e){
+	} catch (NumberFormatException e) {
 	    // do nothing
 	}
 	return result;
     }
 
-    /**
-     * @param args
-     * @throws IOException 
-     * @throws UnknownHostException 
-     */
-    public static void main(String[] args) throws UnknownHostException, IOException {
+    @Override
+    public void onClientError(final Exception e) {
+	SwingUtilities.invokeLater(new Runnable() {
+
+	    @Override
+	    public void run() {
+		JOptionPane.showMessageDialog(ClientGui.this, e
+			.getMessage(), "Some error occurred",
+			JOptionPane.ERROR_MESSAGE);
+
+	    }
+
+	});
+
+    }
+
+    @Override
+    public void onResult(final int value) {
+	SwingUtilities.invokeLater(new Runnable() {
+
+	    @Override
+	    public void run() {
+		readField.setText(Integer.toString(value));
+
+	    }
+
+	});
+    }
+
+    public static void main(String[] args) {
 	ClientGui client = new ClientGui();
 	client.setVisible(true);
 	client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
