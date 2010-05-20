@@ -25,7 +25,7 @@ import br.unicamp.ic.zooexp.core.Reply;
 import br.unicamp.ic.zooexp.core.server.Data;
 import br.unicamp.ic.zooexp.server.WorkerThread;
 
-import br.unicamp.ic.zooexp.tests.WorkerThreadTest.MockedSocket;
+import br.unicamp.ic.zooexp.tests.WorkerThreadTest.*;
 
 
 @UsingMocksAndStubs({MockedSocket.class})
@@ -78,7 +78,7 @@ public class WorkerThreadTest {
 	Operation add32   = new Operation(Operation.ADD_OP,32);
 	Operation readop  = new Operation(Operation.READ_OP,3);
 	Operation sub3    = new Operation(Operation.SUB_OP,3);
-	Operation invalid = new Operation(-1,0);
+	Operation invalid = new Operation(Operation.INVALID_OP,0);
 	
 	set15.serialize(encapsulatedRecord);
 	add32.serialize(encapsulatedRecord);
@@ -116,20 +116,21 @@ public class WorkerThreadTest {
 	//verify server replies
 	DataInputStream serverReplies = new DataInputStream(new ByteArrayInputStream(serverOutput.toByteArray()));
 	
-	Reply reply = Reply.parse(serverReplies);
+	Reply reply = new Reply(); 
+	reply.parse(serverReplies);
 	assertTrue("Expected SUCCESS for OP SET 15", reply.getType() == Reply.REPLY_SUCCESS);
 	
-	reply = Reply.parse(serverReplies);
+	reply.parse(serverReplies);
 	assertTrue("Expected SUCCESS for OP ADD 32", reply.getType() == Reply.REPLY_SUCCESS);
 	
-	reply = Reply.parse(serverReplies);
+	reply.parse(serverReplies);
 	assertTrue("Expected VALUE for READ OP", reply.getType() == Reply.REPLY_VALUE);
 	assertEquals("Expected a return value of 47",47, reply.getReturnValue());
 	
-	reply = Reply.parse(serverReplies);
+	reply.parse(serverReplies);
 	assertTrue("Expected SUCCESS for OP SUB 3", reply.getType() == Reply.REPLY_SUCCESS);
 
-	reply = Reply.parse(serverReplies);
+	reply.parse(serverReplies);
 	assertTrue("Expected FAILURE for INVALID OP", reply.getType() == Reply.REPLY_FAILURE);
 	
 	assertEquals("No more data from server was expected",0,serverReplies.available());

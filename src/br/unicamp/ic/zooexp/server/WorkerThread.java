@@ -1,9 +1,9 @@
 package br.unicamp.ic.zooexp.server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.log4j.Logger;
@@ -19,21 +19,22 @@ public class WorkerThread implements Runnable {
     
     private Socket connection;
     private Data data;
-    private DataInputStream fromClientStream;
-    private DataOutputStream toClientStream;
+    private InputStream fromClientStream;
+    private OutputStream toClientStream;
     private final String clientId;
 
     public WorkerThread(Socket connection, Data data) throws IOException {
 	this.connection = connection;
 	this.data = data;
-	this.fromClientStream = new DataInputStream(connection.getInputStream());
-	this.toClientStream = new DataOutputStream(connection.getOutputStream());
+	this.fromClientStream = connection.getInputStream();
+	this.toClientStream = connection.getOutputStream();
 	//We use IP:Port to identify a client. It works even on same host
 	this.clientId = connection.getInetAddress().getHostAddress()+":"+connection.getPort();
     }
 
     private void processRequest() throws IOException {
-	Operation op = Operation.parse(fromClientStream);
+	Operation op = new Operation();
+	op.parse(fromClientStream);
 	Reply reply = data.executeOperation(op);
 
 	// Send reply to client

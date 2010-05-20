@@ -45,7 +45,7 @@ public class DataTest {
 	assertEquals("Data shall be 50 now",50,reply.getReturnValue());
 	
 	//Invalid Operation
-	Operation invalid = new Operation(-1,0);
+	Operation invalid = new Operation(Operation.INVALID_OP,0);
 	reply = data.executeOperation(invalid);
 	assertTrue("Expecting failure with invalid operation", reply.getType() == Reply.REPLY_FAILURE);
     }

@@ -62,14 +62,14 @@ public class Client {
     }
     
     private Reply sendOperationAndGetReply(Operation op) throws ServerException, IOException{
-	Reply result = null;
+	Reply result = new Reply();
 	
 	try {
 	    if(!isConnected){
 	        connect();
 	    }
 	    op.serialize(toServer);
-	    result = Reply.parse(fromServer);
+	    result.parse(fromServer);
 	    toServer.flush();
 	    
 	    if (result.getType() == Reply.REPLY_FAILURE) {

@@ -49,7 +49,7 @@ public class DispatcherThread extends Thread {
     
     
     private void enqueueRequest(PendingRequest pr){
-	queue.offer(pr);
+	queue.add(pr);
 	//notify consumer thread
 	synchronized(this){notifyAll();}
     }

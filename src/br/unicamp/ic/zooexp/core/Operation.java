@@ -1,40 +1,65 @@
 package br.unicamp.ic.zooexp.core;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
-public class Operation {
+public class Operation extends Marshallable{
     // Operations
-    public static final int SET_OP = 1;
-    public static final int ADD_OP = 2;
-    public static final int SUB_OP = 3;
-    public static final int READ_OP = 4;
-
-    private int type;
+    public static final byte INVALID_OP = -1;
+    public static final byte SET_OP = 1;
+    public static final byte ADD_OP = 2;
+    public static final byte SUB_OP = 3;
+    public static final byte READ_OP = 4;
+    
+   
+    private byte type;
     private int arg;
 
-    public Operation(int type, int argument) {
+    public Operation(){
+	this(INVALID_OP,0);
+    }
+    
+    public Operation(byte type, int argument) {
 	this.type = type;
 	this.arg = argument;
     }
     
-    public int getType(){
+    public byte getType(){
 	return type;
     }
     
     public int getArg(){
-	if(type == READ_OP)
-	    throw new UnsupportedOperationException("Read operation do not take arguments");
+	if(type == READ_OP || type == INVALID_OP)
+	    throw new UnsupportedOperationException("Operation do not take arguments");
 	
 	return arg;
     }
-
-    public void serialize(DataOutputStream out) throws IOException {
-	out.writeInt(type);
-	out.writeInt(arg);
+    
+    @Override
+    protected int sizeof() {
+	return 5;
     }
 
+    
+    public byte[] toByteArray(){
+	return new byte[] { type,
+		            (byte) (arg >>> 24),
+		            (byte) (arg >>> 16),
+		            (byte) (arg >>> 8),
+		            (byte) arg 
+		            };
+	
+    }
+    
+    public void fromByteArray(byte [] bytes){
+	if (bytes.length != sizeof()) 
+	    throw new IllegalArgumentException("byte array shall have size " + sizeof());
+	type = bytes[0];
+	arg = ((bytes[1] & 0xff) << 24) |
+		((bytes[2] & 0xff) << 16) |
+		((bytes[3] & 0xff) << 8) |
+		(bytes[4] & 0xff);
+    }
+
+ 
     public int apply(int currentValue) {
 
 	int result = currentValue;
@@ -55,12 +80,6 @@ public class Operation {
 	    // do nothing
 	}
 	return result;
-    }
-
-    public static Operation parse(DataInputStream in) throws IOException {
-	int type = in.readInt();
-	int arg = in.readInt();
-	return new Operation(type, arg);
     }
 
 }

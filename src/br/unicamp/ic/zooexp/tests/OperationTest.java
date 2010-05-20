@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -27,8 +25,7 @@ public class OperationTest {
 	Operation sub3   = new Operation(Operation.SUB_OP,3);
 	
 	// write  to log 
-	ByteArrayOutputStream bufferOut = new ByteArrayOutputStream();
-	DataOutputStream out = new DataOutputStream(bufferOut);
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	
 	set15.serialize(out);
 	add32.serialize(out);
@@ -39,25 +36,26 @@ public class OperationTest {
 	out.close();
 	
 	// retrieve log
-	byte[] log = bufferOut.toByteArray();
+	byte[] log = out.toByteArray();
 	
 	// read from log
-	ByteArrayInputStream bufferInput = new ByteArrayInputStream(log);
-	DataInputStream in = new DataInputStream(bufferInput);
+	ByteArrayInputStream in = new ByteArrayInputStream(log);
 	
-	Operation currentOp  = Operation.parse(in);
+	
+	Operation currentOp  = new Operation();
+	currentOp.parse(in);
 	value = currentOp.apply(value);
 	assertEquals("Current operation shall set value to 15",15,value);
 	
-	currentOp  = Operation.parse(in);
+	currentOp.parse(in);
 	value = currentOp.apply(value);
 	assertEquals("Current operation shall set value to 47",47,value);
 	
-	currentOp  = Operation.parse(in);
+	currentOp.parse(in);
 	value = currentOp.apply(value);
 	assertEquals("Current operation shall modify value",47,value);
 	
-	currentOp  = Operation.parse(in);
+	currentOp.parse(in);
 	value = currentOp.apply(value);
 	assertEquals("Current operation shall set value to 44",44,value);
 	

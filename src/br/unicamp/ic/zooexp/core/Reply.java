@@ -1,21 +1,22 @@
 package br.unicamp.ic.zooexp.core;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
 
-public class Reply {
+public class Reply extends Marshallable{
 
     //Types
-    public static final int REPLY_FAILURE = -1;
-    public static final int REPLY_SUCCESS = 1;
-    public static final int REPLY_VALUE = 2;
+    public static final byte REPLY_FAILURE = -1;
+    public static final byte REPLY_SUCCESS = 1;
+    public static final byte REPLY_VALUE = 2;
 
-    private int type;
+    private byte type;
     private int returnValue = 0;
     
-    // disallow instances
-    private Reply(int type, int returnValue ){ 
+    
+    public Reply(){
+	this(REPLY_FAILURE,0);
+    }
+    
+    private Reply(byte type, int returnValue ){ 
 	this.type = type;
 	this.returnValue = returnValue;
     }
@@ -31,27 +32,45 @@ public class Reply {
     public static Reply createReturnReply(int returnValue){
 	 return new Reply(REPLY_VALUE,returnValue);
     }
+
     
-    
-    public void serialize(DataOutputStream out) throws IOException {
-	out.writeInt(type);
-	out.writeInt(returnValue);
-    }
-    
-    public static Reply parse(DataInputStream in) throws IOException {
-	int type = in.readInt();
-	int value = in.readInt();
-	return new Reply(type,value);
-    }
-    
-    public int getType(){
+    public byte getType(){
 	return type;
     }
     
     public int getReturnValue(){
-	if(type != REPLY_VALUE) 
+	if(type != REPLY_VALUE ) 
 	    throw new UnsupportedOperationException("Acknowledges do not have return values");
 	return returnValue;
+    }
+
+    @Override
+    protected int sizeof() {
+	return 5;
+    }
+    
+    @Override
+    public void fromByteArray(byte[] bytes) {
+	if (bytes.length != sizeof()) 
+	    throw new IllegalArgumentException("byte array shall have size " + sizeof());
+	type = bytes[0];
+	returnValue = ((bytes[1] & 0xff) << 24) |
+        	      ((bytes[2] & 0xff) << 16) |
+        	      ((bytes[3] & 0xff) << 8) |
+        	      (bytes[4] & 0xff);
+	
+    }
+
+ 
+
+    @Override
+    public byte[] toByteArray() {
+	return new byte[] { type,
+	            (byte) (returnValue >>> 24),
+	            (byte) (returnValue >>> 16),
+	            (byte) (returnValue >>> 8),
+	            (byte) returnValue 
+	            };
     }
 
     
