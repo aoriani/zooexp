@@ -17,7 +17,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
-public class ClientGui extends JFrame implements
+public final class ClientGui extends JFrame implements
 	DispatcherThread.ClientEventListener {
 
     private static final long serialVersionUID = -3859715597744512663L;
@@ -33,9 +33,9 @@ public class ClientGui extends JFrame implements
 		throws BadLocationException {
 	    StringBuffer buffer = new StringBuffer();
 	    for (int i = 0; i < str.length(); i++) {
-		
+
 		char c = str.charAt(i);
-		//allows digits and  a minus sign if it is on the start
+		// allows digits and a minus sign if it is on the start
 		if (Character.isDigit(c) || (offs == 0 && c == '-')) {
 		    buffer.append(c);
 		}
@@ -47,7 +47,7 @@ public class ClientGui extends JFrame implements
 
     JButton setBt, readBt, addBt, subBt;
     JTextField writeField, readField;
-    DispatcherThread dispatcher;
+    transient DispatcherThread dispatcher;
 
     public ClientGui() {
 	super("Client");
@@ -131,7 +131,7 @@ public class ClientGui extends JFrame implements
 
 	});
 
-	//Start dispatcher thread
+	// Start dispatcher thread
 	dispatcher = new DispatcherThread(this);
 	dispatcher.start();
     }
@@ -152,9 +152,8 @@ public class ClientGui extends JFrame implements
 
 	    @Override
 	    public void run() {
-		JOptionPane.showMessageDialog(ClientGui.this, e
-			.getMessage(), "Some error occurred",
-			JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(ClientGui.this, e.getMessage(),
+			"Some error occurred", JOptionPane.ERROR_MESSAGE);
 
 	    }
 

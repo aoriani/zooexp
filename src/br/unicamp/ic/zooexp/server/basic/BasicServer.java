@@ -1,4 +1,4 @@
-package br.unicamp.ic.zooexp.server;
+package br.unicamp.ic.zooexp.server.basic;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -12,9 +12,9 @@ import br.unicamp.ic.zooexp.core.Configuration;
 import br.unicamp.ic.zooexp.core.server.Data;
 
 /**
- * This is a basic server class that waits for connections
- * and dispatch it to worker threads
- *
+ * This is a basic server class that waits for connections and dispatch it to
+ * worker threads
+ * 
  */
 public class BasicServer {
 
@@ -40,9 +40,10 @@ public class BasicServer {
 			.getHostAddress()
 			+ ":" + clientSocket.getPort();
 		log.info("Connected to " + clientId);
-		
-		//set client timeout
-		clientSocket.setSoTimeout(Configuration.getServerClientTimeout());
+
+		// set client timeout
+		clientSocket.setSoTimeout(Configuration
+			.getServerClientTimeout());
 
 		// Dispatching to a work thread.
 		// We use IP:port to identify client of worker thread

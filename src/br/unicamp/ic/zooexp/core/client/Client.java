@@ -16,66 +16,70 @@ import br.unicamp.ic.zooexp.core.server.Data;
 
 /**
  * The client library for our server
- *
+ * 
  */
 public class Client {
     /** Logger */
     private static final Logger log = Logger.getLogger(Data.class);
-    
-    
+
     boolean isConnected;
     String serverAddress;
     int serverPort;
     DataOutputStream toServer;
     DataInputStream fromServer;
     Socket socket;
-    
-    public Client(){
+
+    public Client() {
 	isConnected = false;
 	serverAddress = Configuration.getServerAddress();
 	serverPort = Configuration.getServerPort();
     }
-    
-    public void connect() throws UnknownHostException, IOException{
-	if(!isConnected){
-	    socket = new Socket(InetAddress.getByName(serverAddress),serverPort);
-	    log.info("Connected to "+serverAddress+":"+serverPort);
-	    
+
+    public void connect() throws UnknownHostException, IOException {
+	if (!isConnected) {
+	    socket = new Socket(InetAddress.getByName(serverAddress),
+		    serverPort);
+	    log.info("Connected to " + serverAddress + ":" + serverPort);
+
 	    toServer = new DataOutputStream(socket.getOutputStream());
 	    fromServer = new DataInputStream(socket.getInputStream());
-	    
+
 	    isConnected = true;
 	}
     }
-    
-    public void disconnect(){
-	if(isConnected){
-        	try {
-		    toServer.close();
-		    fromServer.close();
-		    socket.close();
-		} catch (IOException e) {
-		    log.warn("Failed to close connection to server", e);
-		}
-        	isConnected = false;
+
+    public void disconnect() {
+	if (isConnected) {
+	    try {
+		toServer.close();
+		fromServer.close();
+		socket.close();
+	    } catch (IOException e) {
+		log.warn("Failed to close connection to server", e);
+	    }
+	    isConnected = false;
 	}
     }
-    
-    private Reply sendOperationAndGetReply(Operation op) throws ServerException, IOException{
+
+    private Reply sendOperationAndGetReply(Operation op)
+	    throws ServerException, IOException {
 	Reply result = new Reply();
-	
+
 	try {
-	    if(!isConnected){
-	        connect();
+	    if (!isConnected) {
+		connect();
 	    }
 	    op.serialize(toServer);
 	    result.parse(fromServer);
 	    toServer.flush();
-	    
+
 	    if (result.getType() == Reply.REPLY_FAILURE) {
-	        throw new ServerException("Server failed to process request. OP:"
-	    	    + op.getType()
-	    	    + ((op.getType() != Operation.READ_OP) ? (" ARG: " + op.getArg()) : ""));
+		throw new ServerException(
+			"Server failed to process request. OP:"
+				+ op.getType()
+				+ ((op.getType() != Operation.READ_OP) ? (" ARG: " + op
+					.getArg())
+					: ""));
 	    }
 	} catch (UnknownHostException e) {
 	    log.error("Could not locate server", e);
@@ -92,29 +96,28 @@ public class Client {
 	}
 	return result;
     }
-    
-    
-    public void set(int value) throws ServerException, IOException{
+
+    public void set(int value) throws ServerException, IOException {
 	log.info("Sending SET request with value " + value);
-	Operation setop = new Operation(Operation.SET_OP,value);
+	Operation setop = new Operation(Operation.SET_OP, value);
 	sendOperationAndGetReply(setop);
     }
-    
-    public void add(int value) throws ServerException, IOException{
+
+    public void add(int value) throws ServerException, IOException {
 	log.info("Sending ADD request with value " + value);
-	Operation addop = new Operation(Operation.ADD_OP,value);
+	Operation addop = new Operation(Operation.ADD_OP, value);
 	sendOperationAndGetReply(addop);
     }
-    
-    public void sub(int value) throws ServerException, IOException{
+
+    public void sub(int value) throws ServerException, IOException {
 	log.info("Sending SUB request with value " + value);
-	Operation subop = new Operation(Operation.SUB_OP,value);
+	Operation subop = new Operation(Operation.SUB_OP, value);
 	sendOperationAndGetReply(subop);
     }
-    
-    public int get() throws ServerException, IOException{
+
+    public int get() throws ServerException, IOException {
 	log.info("Sending READ request");
-	Operation addop = new Operation(Operation.READ_OP,0);
+	Operation addop = new Operation(Operation.READ_OP, 0);
 	Reply reply = sendOperationAndGetReply(addop);
 	return reply.getReturnValue();
     }
