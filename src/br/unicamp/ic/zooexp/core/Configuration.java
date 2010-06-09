@@ -13,7 +13,7 @@ import br.unicamp.ic.zooexp.core.server.Data;
 
 /**
  * Class to retrieve configurations for servers and clients
- * 
+ *
  */
 public class Configuration {
     /** Logger */
@@ -42,60 +42,74 @@ public class Configuration {
 
     /** The list of server in a zookeeper ensemble */
     private static final String ZOOSERVER_LIST_KEY = "zooserver_list";
+
+    /** The znode used for server group membership */
+    private static final String SERVERS_ZNODE_KEY = "servers_group_znode";
+
+    /** The znode used for logging operations */
+    private static final String OPLOG_ZNODE_KEY = "servers_group_znode";
     // ======================================================================
 
     // LoadConfiguration file
     static {
-	properties = new Properties();
-	URL url = ClassLoader.getSystemResource(CONF_FILE);
-	if (url != null) {
-	    FileInputStream propertiesFile = null;
-	    try {
-		propertiesFile = new FileInputStream(new File(url.getFile()));
-		properties.load(propertiesFile);
-	    } catch (FileNotFoundException e) {
-		log.warn("Could not open properties file", e);
-	    } catch (IOException e) {
-		log.error("Problem while loading property file", e);
-	    } finally {
-		try {
-		    propertiesFile.close();
-		} catch (IOException e) {
-		    log.error("Problem while closing property file", e);
-		}
-	    }
-	} else {
-	    log.info("Could not get configuation file. Using default values");
-	}
+        properties = new Properties();
+        URL url = ClassLoader.getSystemResource(CONF_FILE);
+        if (url != null) {
+            FileInputStream propertiesFile = null;
+            try {
+                propertiesFile = new FileInputStream(new File(url.getFile()));
+                properties.load(propertiesFile);
+            } catch (FileNotFoundException e) {
+                log.warn("Could not open properties file", e);
+            } catch (IOException e) {
+                log.error("Problem while loading property file", e);
+            } finally {
+                try {
+                    propertiesFile.close();
+                } catch (IOException e) {
+                    log.error("Problem while closing property file", e);
+                }
+            }
+        } else {
+            log.info("Could not get configuation file. Using default values");
+        }
     }
 
     private static int getIntProperty(String propertyKey, int defaultValue) {
-	return Integer.parseInt(properties.getProperty(propertyKey, Integer
-		.toString(defaultValue)));
+        return Integer.parseInt(properties.getProperty(propertyKey, Integer
+                .toString(defaultValue)));
     }
 
     public static int getServerPort() {
-	return getIntProperty(SERVER_PORT_KEY, 4040);
+        return getIntProperty(SERVER_PORT_KEY, 4040);
     }
 
     public static int getServerMaxConn() {
-	return getIntProperty(SERVER_MAXCONN_KEY, 100);
+        return getIntProperty(SERVER_MAXCONN_KEY, 100);
     }
 
     public static int getServerClientTimeout() {
-	return getIntProperty(SERVER_CLIENT_TIMEOUT_KEY, 5000 * 60);
+        return getIntProperty(SERVER_CLIENT_TIMEOUT_KEY, 5000 * 60);
     }
 
     public static String getServerAddress() {
-	return properties.getProperty(SERVER_ADDRESS_KEY, "127.0.0.1");
+        return properties.getProperty(SERVER_ADDRESS_KEY, "127.0.0.1");
     }
 
     public static int getZooTimeout() {
-	return getIntProperty(ZOOKEEPER_TIMEOUT_KEY, 5000);
+        return getIntProperty(ZOOKEEPER_TIMEOUT_KEY, 5000);
     }
 
     public static String getZooKeeperServerList() {
-	return properties.getProperty(ZOOSERVER_LIST_KEY, "127.0.0.1:2181");
+        return properties.getProperty(ZOOSERVER_LIST_KEY, "127.0.0.1:2181");
+    }
+
+    public static String getServerZnodeGroup() {
+        return properties.getProperty(SERVERS_ZNODE_KEY, "/servers");
+    }
+
+    public static String getOpLogZnode() {
+        return properties.getProperty(OPLOG_ZNODE_KEY, "/operations");
     }
 
 }
