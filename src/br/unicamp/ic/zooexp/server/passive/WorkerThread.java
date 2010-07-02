@@ -7,27 +7,26 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.log4j.Logger;
-import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.ZooDefs.Ids;
 
 import br.unicamp.ic.zooexp.core.Configuration;
 import br.unicamp.ic.zooexp.core.Operation;
 import br.unicamp.ic.zooexp.core.Reply;
 import br.unicamp.ic.zooexp.core.server.Data;
+import br.unicamp.ic.zooexp.server.passive.trasactions.CreateLogEntryTransaction;
 
 public class WorkerThread implements Runnable {
 
     /** Logger */
     private static final Logger log = Logger.getLogger(Data.class);
 
-    private Socket connection;
-    private Data data;
-    private InputStream fromClientStream;
-    private OutputStream toClientStream;
+    private final Socket connection;
+    private final Data data;
+    private final InputStream fromClientStream;
+    private final OutputStream toClientStream;
     private final String clientId;
-    private ZooKeeper zooCon;
+    private final ZooKeeper zooCon;
 
     public WorkerThread(Socket connection, ServerContext context) throws IOException {
         this.connection = connection;
@@ -36,24 +35,23 @@ public class WorkerThread implements Runnable {
         this.fromClientStream = connection.getInputStream();
         this.toClientStream = connection.getOutputStream();
         // We use IP:Port to identify a client. It works even on same host
-        this.clientId = connection.getInetAddress().getHostAddress() + ":"
-                + connection.getPort();
+        this.clientId = connection.getInetAddress().getHostAddress() + ":" + connection.getPort();
     }
 
-    private void processRequest() throws IOException {
+    private void processRequest() throws IOException, InterruptedException {
+
+        Reply reply = Reply.createFailureReply();
+
         Operation op = new Operation();
         op.parse(fromClientStream);
         //send to zookeeper
         try {
-          if(op.getType() != Operation.READ_OP) zooCon.create(Configuration.getOpLogZnode()+"/op-", op.toByteArray(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL);
+          if(op.getType() != Operation.READ_OP)
+              (new CreateLogEntryTransaction(zooCon,Configuration.getOpLogZnode(), op.toByteArray())).invoke();
+          reply = data.executeOperation(op);
         } catch (KeeperException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("failed to persist operation to Zookeeper for "+ clientId, e);
         }
-        Reply reply = data.executeOperation(op);
 
         // Send reply to client
         reply.serialize(toClientStream);
@@ -76,6 +74,10 @@ public class WorkerThread implements Runnable {
                     clientConnected = false;
                     log.warn("Connection with client " + clientId
                             + " ended by failure", e);
+                } catch (InterruptedException e) {
+                    clientConnected = false;
+                    log.warn("Work thread for client " + clientId
+                            + "was interrupted", e);
                 }
             }
 

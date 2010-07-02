@@ -9,11 +9,13 @@ import org.apache.zookeeper.ZooKeeper;
 
 /**
  * This is the base class to implement all operations with zoopkeeper.
- * It is reponsible to retry the operation in case of connection failures
+ * It is responsible to retry the operation in case of connection failures
  * with ZooKeeper
  *
+ * @param <ReturnType> The type of the return of operation
+ *
  */
-public abstract class Transaction {
+public abstract class Transaction<ReturnType> {
 
     /** Logger */
     private static final Logger log = Logger.getLogger(GetDataTransaction.class);
@@ -29,6 +31,8 @@ public abstract class Transaction {
     protected String path;
     /** The system ZooKeeper instance */
     protected ZooKeeper zooConn;
+    /**The result for the zookeeper operation*/
+    protected ReturnType result;
 
 
 
@@ -114,5 +118,18 @@ public abstract class Transaction {
      */
     protected abstract void trasactionBody() throws KeeperException,
             InterruptedException;
+
+
+    /**
+     * Calls and execute operation on zookeeper ensemble
+     * @return the result of zookeeper operation
+     * @throws KeeperException
+     * @throws InterruptedException
+     */
+    public ReturnType invoke() throws KeeperException, InterruptedException{
+        execute();
+        return result;
+
+    }
 
 }

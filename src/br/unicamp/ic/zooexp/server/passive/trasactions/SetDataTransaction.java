@@ -9,13 +9,13 @@ import org.apache.zookeeper.data.Stat;
 /**
  * Resilient {@link ZooKeeper#setData}
  */
-public class SetDataTransaction extends Transaction {
+public class SetDataTransaction extends Transaction <Stat>{
 
     private byte[] data;
     private int version;
-    private Stat result;
 
     /**
+     *
      * @param conn conn ZooKeeper connection
      * @param path the path to znode you want to set data
      * @param data the data for the  znode
@@ -23,7 +23,7 @@ public class SetDataTransaction extends Transaction {
      */
     public SetDataTransaction(ZooKeeper conn, String path, byte[] data, int version){
         super(conn,path);
-        this.data = Arrays.copyOf(data, data.length);
+        this.data = data;
         this.version = version;
     }
 
@@ -41,12 +41,6 @@ public class SetDataTransaction extends Transaction {
     protected void trasactionBody() throws KeeperException,
             InterruptedException {
         result = zooConn.setData(path, data, version);
-    }
-
-
-    public Stat setData() throws KeeperException, InterruptedException{
-        execute();
-        return result;
     }
 
 }

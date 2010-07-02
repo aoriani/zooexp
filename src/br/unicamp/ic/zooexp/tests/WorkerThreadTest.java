@@ -20,12 +20,11 @@ import mockit.UsingMocksAndStubs;
 
 import org.junit.Test;
 
+import br.unicamp.ic.zooexp.tests.WorkerThreadTest.MockedSocket;
 import br.unicamp.ic.zooexp.core.Operation;
 import br.unicamp.ic.zooexp.core.Reply;
 import br.unicamp.ic.zooexp.core.server.Data;
 import br.unicamp.ic.zooexp.server.basic.WorkerThread;
-
-import br.unicamp.ic.zooexp.tests.WorkerThreadTest.*;
 
 @UsingMocksAndStubs( { MockedSocket.class })
 public class WorkerThreadTest {

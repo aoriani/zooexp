@@ -15,14 +15,13 @@ import org.apache.zookeeper.ZooDefs.Ids;
  * in case of partial failure.
  *
  */
-public class CreateLogEntryTransaction extends Transaction {
+public class CreateLogEntryTransaction extends Transaction<String> {
 
     /** We use the session id and a local sequential number to detect partial failure*/
     static volatile AtomicInteger localSeqNumber = new AtomicInteger();
     private String parentNode;
     private byte[] data;
     private boolean firstAttempt;
-    private String result;
 
     /**
      * Created a persistent non-idempotent node with data set under an other znode
@@ -33,7 +32,7 @@ public class CreateLogEntryTransaction extends Transaction {
     public CreateLogEntryTransaction(ZooKeeper conn, String parentNode, byte[] data){
         super(conn, conn.getSessionId() + "-" + localSeqNumber.incrementAndGet() + "-");
         this.parentNode = parentNode;
-        this.data = Arrays.copyOf(data,data.length);
+        this.data = data;
         this.firstAttempt = true;
     }
 
@@ -67,11 +66,6 @@ public class CreateLogEntryTransaction extends Transaction {
         return "CreateLogEntryTransaction [data=" + Arrays.toString(data) + ", firstAttempt="
                 + firstAttempt + ", parentNode=" + parentNode + ", result="
                 + result + ", path=" + path + ", zooConn=" + zooConn + "]";
-    }
-
-    public String createLogEntry() throws KeeperException, InterruptedException{
-        execute();
-        return result;
     }
 
 }

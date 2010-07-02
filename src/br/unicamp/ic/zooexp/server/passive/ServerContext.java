@@ -10,49 +10,58 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
-import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
 
 import br.unicamp.ic.zooexp.core.Configuration;
 import br.unicamp.ic.zooexp.core.server.Data;
+import br.unicamp.ic.zooexp.server.passive.trasactions.CreateNodeTransaction;
 
 public class ServerContext implements Watcher {
     /** Logger */
     private static final Logger log = Logger.getLogger(ServerContext.class);
 
+    public enum State {INIT,BACKUP, PRIMARY};
+
+
     private ZooKeeper zooConnection;
     private Data data = new Data();
     private CountDownLatch connectedSignal = new CountDownLatch(1);
+    private State currentState = State.INIT;
 
-    private void connectToZooKeeper() {
-
-        // Attempt 10 times to connect to Zookeeper
-        for (int i = 1;; i++) {
-            try {
-                zooConnection = new ZooKeeper(Configuration.getZooKeeperServerList(),
-                                                Configuration.getZooTimeout(), this);
-                connectedSignal.await();
-            } catch (IOException e) {
-                log.warn("Attemp #" + i + " to connect to ZooKeeper failed", e);
-
-                if (i == 10) {
-                    log.fatal("Maximum attemps to connect to ZooKeeper. Shutting down!");
-                    System.exit(1);
-                }
-                // Back off
-                try {
-                    Thread.sleep(1000L * 10L * i);
-                } catch (InterruptedException e1) {
-                    log.error("Back off interrupted", e1);
-                }
-                continue; // retry again
-            } catch (InterruptedException e) {
-                log.error("Interrupted when wainting for connection", e);
-            }
-
-            // We connected, get out the loop
-            break;
+    private void connectZooKeeper() throws InterruptedException {
+        try {
+            zooConnection = new ZooKeeper(Configuration.getZooKeeperServerList(),
+                    Configuration.getZooTimeout(), this);
+        } catch (IOException e) {
+           log.fatal("Could not connect to Zookeeper Ensemble",e);
+           System.exit(1);
         }
+
+        //We are in the process of connecting. Wait it to finish
+        connectedSignal.await();
+    }
+
+
+    private ServerState nextState(){
+        ServerState newState = null;
+
+        switch(currentState){
+            case INIT:
+                currentState = State.BACKUP;
+                newState = new BackupState(this);
+            break;
+
+            case BACKUP:
+                currentState = State.PRIMARY;
+                newState = new PrimaryState(this);
+            break;
+
+            case PRIMARY:
+            default:
+                //do nothing, null is already the answer
+        }
+
+        return newState;
     }
 
     @Override
@@ -72,42 +81,7 @@ public class ServerContext implements Watcher {
                     log.error("Got interrupted when closing after expiration");
                 }
             System.exit(1);
-
         }
-
-    }
-
-    public static void main(String[] args) {
-        ServerContext s = new ServerContext();
-        s.connectToZooKeeper();
-
-        //create nodes
-        try {
-            s.zooConnection.create(Configuration.getOpLogZnode(), null, Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        } catch (KeeperException e1) {
-            if(e1.code() != Code.NODEEXISTS)
-                    e1.printStackTrace();
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        Thread state1 = new Thread (new BackupState(s));
-        state1.start();
-        try {
-            state1.join();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        Thread state2 = new Thread (new PrimaryState(s));
-        state2.start();
-        try {
-            state2.join();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
     }
 
     public ZooKeeper getZookeeper() {
@@ -116,6 +90,43 @@ public class ServerContext implements Watcher {
 
     public Data getData() {
         return data;
+    }
+
+    public State getCurrentState(){
+        return currentState;
+    }
+
+    public static void main(String[] args)  {
+
+        try{
+            //Connect to Zookeeper
+            ServerContext context= new ServerContext();
+            context.connectZooKeeper();
+
+            //Ensure we have the operation log
+            try{
+              (new CreateNodeTransaction(context.getZookeeper(),
+                      Configuration.getOpLogZnode(),null,
+                      Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)).invoke();
+            }catch(KeeperException.NodeExistsException e ){
+                //It is okay, node already exist
+            }
+
+            //Transition from state to state
+            ServerState state = context.nextState();
+            while(state != null){
+                state.execute();
+                state = context.nextState();
+            }
+        } catch (InterruptedException e){
+            log.warn("Server got interrupted",e);
+        } catch (KeeperException e ){
+            log.fatal("Some problem when interationg with ZooKeeper", e);
+            System.exit(1);
+        } catch (Throwable t ){
+            log.fatal("Some very bad thing happened",t);
+            System.exit(1);
+        }
     }
 
 }

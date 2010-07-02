@@ -9,10 +9,7 @@ import org.apache.zookeeper.ZooKeeper;
 /**
  * Resilient {@link ZooKeeper#getData}
  */
-public final class GetDataTransaction extends Transaction {
-
-    byte[] result;
-
+public final class GetDataTransaction extends Transaction<byte[]> {
 
     /**
      * @param conn ZooKeeper connection
@@ -33,10 +30,5 @@ public final class GetDataTransaction extends Transaction {
     @Override
     protected void trasactionBody() throws KeeperException, InterruptedException{
         result = zooConn.getData(path, null, null);
-    }
-
-    public byte[] getData() throws KeeperException, InterruptedException{
-        execute();
-        return result;
     }
 }

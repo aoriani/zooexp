@@ -1,6 +1,7 @@
 package br.unicamp.ic.zooexp.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
@@ -11,13 +12,13 @@ import mockit.UsingMocksAndStubs;
 import org.apache.zookeeper.KeeperException;
 import org.junit.Test;
 
-import br.unicamp.ic.zooexp.server.passive.trasactions.Transaction;
 import br.unicamp.ic.zooexp.tests.TransactionTest.MockedRandom;
+import br.unicamp.ic.zooexp.server.passive.trasactions.Transaction;
 
 @UsingMocksAndStubs( { MockedRandom.class })
 public class TransactionTest {
 
-    private class MockedTransaction extends Transaction{
+    private class MockedTransaction<T> extends Transaction<T>{
 
         private String description;
         private KeeperException exception;

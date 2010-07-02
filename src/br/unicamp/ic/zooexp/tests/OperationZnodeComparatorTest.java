@@ -1,6 +1,8 @@
 package br.unicamp.ic.zooexp.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
 
 import br.unicamp.ic.zooexp.server.passive.utils.OperationZnodeComparator;
