@@ -48,6 +48,9 @@ public class Configuration {
 
     /** The znode used for logging operations */
     private static final String OPLOG_ZNODE_KEY = "servers_group_znode";
+
+    /** Tells if user must retrieve the server configuration from Zookeeper **/
+    private static final String SERVER_CONF_ZOOKEEPER = "server_conf_zookeeper";
     // ======================================================================
 
     // LoadConfiguration file
@@ -77,6 +80,11 @@ public class Configuration {
 
     private static int getIntProperty(String propertyKey, int defaultValue) {
         return Integer.parseInt(properties.getProperty(propertyKey, Integer
+                .toString(defaultValue)));
+    }
+
+    private static boolean getBooleanProperty(String propertyKey, boolean defaultValue) {
+        return "true".equalsIgnoreCase(properties.getProperty(propertyKey, Boolean
                 .toString(defaultValue)));
     }
 
@@ -110,6 +118,10 @@ public class Configuration {
 
     public static String getOpLogZnode() {
         return properties.getProperty(OPLOG_ZNODE_KEY, "/operations");
+    }
+
+    public static boolean shallRetrieveServerFromZooKeeper() {
+        return getBooleanProperty(SERVER_CONF_ZOOKEEPER,false);
     }
 
 }

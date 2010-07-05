@@ -3,6 +3,4 @@
 bin/
 .fbprefs
 .settings
-.project
-.classpath
 */build/*
