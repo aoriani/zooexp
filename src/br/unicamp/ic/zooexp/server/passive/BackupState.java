@@ -119,7 +119,7 @@ public class BackupState implements ServerState, LockListener, Watcher {
 
         //Apply pending operations
         for (String opZnode : notYetAppliedOps) {
-            byte[] opData = (new GetDataTransaction(zoo,znodeOpLog + "/" + opZnode)).invoke();
+            byte[] opData = (new GetDataTransaction(zoo,znodeOpLog + "/" + opZnode, null)).invoke();
             Operation operation = new Operation();
             operation.fromByteArray(opData);
             data.executeOperation(operation);

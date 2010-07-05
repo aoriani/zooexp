@@ -3,6 +3,7 @@ package br.unicamp.ic.zooexp.server.passive.trasactions;
 import java.util.Arrays;
 
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
 
 
@@ -11,12 +12,17 @@ import org.apache.zookeeper.ZooKeeper;
  */
 public final class GetDataTransaction extends Transaction<byte[]> {
 
+    /** The watcher to be notified of changes in the node*/
+    private Watcher watcher;
+
     /**
      * @param conn ZooKeeper connection
      * @param nodePath the path to znode you want to get data
+     * @param watcher TODO
      */
-    public GetDataTransaction(ZooKeeper conn,String nodePath){
+    public GetDataTransaction(ZooKeeper conn,String nodePath, Watcher watcher){
         super(conn,nodePath);
+        this.watcher = watcher;
     }
 
 
@@ -24,11 +30,11 @@ public final class GetDataTransaction extends Transaction<byte[]> {
     @Override
     public String toString() {
         return "GetDataTransaction [result=" + Arrays.toString(result) + ", path=" + path
-                + ", zooConn=" + zooConn + "]";
+                + ", zooConn=" + zooConn + ", watcher=" + watcher +"]";
     }
 
     @Override
     protected void trasactionBody() throws KeeperException, InterruptedException{
-        result = zooConn.getData(path, null, null);
+        result = zooConn.getData(path, watcher, null);
     }
 }

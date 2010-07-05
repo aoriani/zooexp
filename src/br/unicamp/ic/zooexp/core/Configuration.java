@@ -27,12 +27,12 @@ public class Configuration {
     // ======================================================================
     /** The port the server listens to */
     private static final String SERVER_PORT_KEY = "server_port";
+
     /** The number of connection the server can hold */
     private static final String SERVER_MAXCONN_KEY = "server_max_conn";
-    // ======================================================================
+
     /** The timeout for client socket */
     private static final String SERVER_CLIENT_TIMEOUT_KEY = "server_timeout";
-    // ======================================================================
 
     /** The server address */
     private static final String SERVER_ADDRESS_KEY = "server_address";
