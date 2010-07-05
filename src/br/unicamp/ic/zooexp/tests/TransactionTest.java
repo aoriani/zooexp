@@ -13,7 +13,7 @@ import org.apache.zookeeper.KeeperException;
 import org.junit.Test;
 
 import br.unicamp.ic.zooexp.tests.TransactionTest.MockedRandom;
-import br.unicamp.ic.zooexp.server.passive.trasactions.Transaction;
+import br.unicamp.ic.zooexp.core.trasactions.Transaction;
 
 @UsingMocksAndStubs( { MockedRandom.class })
 public class TransactionTest {

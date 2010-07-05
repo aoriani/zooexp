@@ -1,4 +1,4 @@
-package br.unicamp.ic.zooexp.server.passive.trasactions;
+package br.unicamp.ic.zooexp.core.trasactions;
 
 import java.util.List;
 

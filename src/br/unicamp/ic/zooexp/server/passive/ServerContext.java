@@ -14,7 +14,7 @@ import org.apache.zookeeper.ZooDefs.Ids;
 
 import br.unicamp.ic.zooexp.core.Configuration;
 import br.unicamp.ic.zooexp.core.server.Data;
-import br.unicamp.ic.zooexp.server.passive.trasactions.CreateNodeTransaction;
+import br.unicamp.ic.zooexp.core.trasactions.CreateNodeTransaction;
 
 public class ServerContext implements Watcher {
     /** Logger */

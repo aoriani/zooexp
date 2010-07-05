@@ -14,7 +14,7 @@ import br.unicamp.ic.zooexp.core.Configuration;
 import br.unicamp.ic.zooexp.core.Operation;
 import br.unicamp.ic.zooexp.core.Reply;
 import br.unicamp.ic.zooexp.core.server.Data;
-import br.unicamp.ic.zooexp.server.passive.trasactions.CreateLogEntryTransaction;
+import br.unicamp.ic.zooexp.core.trasactions.CreateLogEntryTransaction;
 
 public class WorkerThread implements Runnable {
 

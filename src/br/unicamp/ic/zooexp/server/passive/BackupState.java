@@ -20,10 +20,10 @@ import org.apache.zookeeper.recipes.lock.WriteLock;
 import br.unicamp.ic.zooexp.core.Configuration;
 import br.unicamp.ic.zooexp.core.Operation;
 import br.unicamp.ic.zooexp.core.server.Data;
+import br.unicamp.ic.zooexp.core.trasactions.GetChildrenTransaction;
+import br.unicamp.ic.zooexp.core.trasactions.GetDataTransaction;
+import br.unicamp.ic.zooexp.core.trasactions.SetDataTransaction;
 import br.unicamp.ic.zooexp.server.passive.ServerContext.State;
-import br.unicamp.ic.zooexp.server.passive.trasactions.GetChildrenTransaction;
-import br.unicamp.ic.zooexp.server.passive.trasactions.GetDataTransaction;
-import br.unicamp.ic.zooexp.server.passive.trasactions.SetDataTransaction;
 import br.unicamp.ic.zooexp.server.passive.utils.OperationZnodeComparator;
 
 /**
